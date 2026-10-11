@@ -1,0 +1,84 @@
+{
+  "model_name": "Regresión logística",
+  "model_version": "0.1.0",
+  "trained_at": "2026-10-11T02:23:01+00:00",
+  "features": [
+    "vol_5",
+    "vol_21",
+    "vol_63",
+    "vol_ratio_5_63",
+    "vol_ratio_21_63",
+    "vol5_vs_med252",
+    "ret_1",
+    "ret_5",
+    "ret_21",
+    "abs_ret_1",
+    "dd_63",
+    "spy_vol_5",
+    "spy_vol_21",
+    "vix",
+    "vix_chg_5",
+    "vix_vs_ma63",
+    "volume_ratio_5_63",
+    "dow",
+    "sector_tecnologia",
+    "sector_bancos",
+    "sector_energia",
+    "sector_salud",
+    "sector_consumo",
+    "sector_indice"
+  ],
+  "decision_threshold": 0.5,
+  "target": "vol_fwd_5d > mediana móvil 252d (trailing) de la vol 5d del ticker",
+  "trained_on": "2016-01 a 2022-12 (train+validación)",
+  "hyperparameters": {
+    "clf__C": 10.0
+  },
+  "test_metrics": {
+    "roc_auc": 0.645629676514955,
+    "pr_auc": 0.5983833166298014,
+    "f1": 0.5167494452076509,
+    "precision": 0.5970695970695971,
+    "recall": 0.4554769001490313,
+    "brier": 0.23309532942447303,
+    "threshold": 0.5,
+    "base_rate": 0.4497319034852547,
+    "n": 11936,
+    "confusion_matrix": [
+      [
+        4918,
+        1650
+      ],
+      [
+        2923,
+        2445
+      ]
+    ]
+  },
+  "baseline_test_metrics": {
+    "roc_auc": 0.588195589054822,
+    "pr_auc": 0.5458315133615728,
+    "f1": 0.5165181885671863,
+    "precision": 0.5146079881656804,
+    "recall": 0.5184426229508197,
+    "brier": null,
+    "threshold": 1.0,
+    "base_rate": 0.4497319034852547,
+    "n": 11936,
+    "confusion_matrix": [
+      [
+        3943,
+        2625
+      ],
+      [
+        2585,
+        2783
+      ]
+    ]
+  },
+  "library_versions": {
+    "scikit-learn": "1.9.1",
+    "xgboost": "3.4.1",
+    "pandas": "3.0.6"
+  }
+}
