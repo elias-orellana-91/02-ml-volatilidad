@@ -1,4 +1,4 @@
-"""Tests de features y target con datos sintéticos (sin red)."""
+﻿"""Tests de features y target con datos sintéticos (sin red)."""
 import numpy as np
 import pandas as pd
 import pytest
@@ -132,3 +132,36 @@ def test_date_splits_respect_gap_and_order(market):
         assert d[tr].max() < d[te].min()
         between = d.unique()[(d.unique() > d[tr].max()) & (d.unique() < d[te].min())]
         assert len(between) >= GAP
+
+
+def test_unknown_ticker_raises_clear_error(market):
+    prices, vix, volume = market
+    bad = prices.rename(columns={"XOM": "ZZZZ"})
+    with pytest.raises(ValueError, match="ZZZZ"):
+        F.build_features(bad, vix, volume)
+
+
+def test_min_history_days_is_tight():
+    n = F.min_history_days()
+    assert n >= F.THRESHOLD_WINDOW + F.HORIZON
+    rng = np.random.default_rng(5)
+
+    def last_row_has_nan(rows):
+        idx = pd.bdate_range("2010-01-04", periods=rows)
+        px = pd.DataFrame(100 * np.cumprod(1 + rng.normal(0, 0.01, (rows, 2)), axis=0), index=idx, columns=["SPY", "AAPL"])
+        X = F.build_features(px, pd.Series(20.0, index=idx), pd.DataFrame(1e6, index=idx, columns=px.columns))
+        return X.xs(idx[-1], level="Date").isna().any().any()
+
+    assert not last_row_has_nan(n)
+    assert last_row_has_nan(n - 1)
+
+
+def test_har_inputs_no_leakage(market):
+    prices, _, _ = market
+    t = prices.index[450]
+    base = F.build_har_inputs(prices)
+    p2 = prices.copy()
+    p2[p2.index > t] *= 4.0
+    changed = F.build_har_inputs(p2)
+    d = base.index.get_level_values("Date") <= t
+    pd.testing.assert_frame_equal(base[d], changed[d])

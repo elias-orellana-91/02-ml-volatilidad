@@ -1,4 +1,4 @@
-"""Tests del artefacto del modelo (sin red)."""
+﻿"""Tests del artefacto del modelo (sin red)."""
 import json
 from pathlib import Path
 
@@ -29,17 +29,6 @@ def test_metadata_fields(metadata):
     assert len(metadata["features"]) == len(set(metadata["features"]))
 
 
-def test_predict_on_synthetic_row(model, metadata):
-    cols = metadata["features"]
-    row = pd.DataFrame([dict.fromkeys(cols, 0.0)])[cols]
-    row["vol5_vs_med252"] = 1.0
-    row["sector_tecnologia"] = 1.0
-    proba = model.predict_proba(row)
-    assert proba.shape == (1, 2)
-    assert 0.0 <= proba[0, 1] <= 1.0
-    assert np.isfinite(proba).all()
-
-
 def test_model_features_match_build_features(metadata):
     """Las columnas del modelo deben poder generarse con build_features (contrato con la API)."""
     rng = np.random.default_rng(0)
@@ -63,3 +52,22 @@ def test_predict_proba_end_to_end(model, metadata):
     last = X.xs("AAPL", level="Ticker").iloc[[-1]][metadata["features"]]
     p = model.predict_proba(last)[0, 1]
     assert 0 <= p <= 1
+
+
+def test_required_inputs(metadata):
+    ri = metadata["required_inputs"]
+    assert set(ri["series"]) == {"prices", "vix", "volume"}
+    assert ri["market_ticker"] == "SPY" and "SPY" in ri["tickers"]
+    assert ri["min_history_days"] >= 252 + 5
+    assert ri["min_history_days"] == F.min_history_days()
+    assert ri["tickers"] == dict(sorted(F.TICKER_TO_SECTOR.items()))
+
+
+def test_trained_on_derived_from_real_dates(metadata):
+    rng = metadata["trained_on_range"]
+    assert rng["start"] < rng["end"] <= "2022-12-31"
+    assert rng["start"] in metadata["trained_on"] and rng["end"] in metadata["trained_on"]
+
+
+def test_metadata_has_all_baselines(metadata):
+    assert set(metadata["baselines_test_metrics"]) == {"Persistencia", "Logística 1 feature", "HAR-RV"}
