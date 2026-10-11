@@ -1,4 +1,4 @@
-﻿# 🌪️ Predicción de volatilidad de acciones de EE.UU. con Machine Learning
+# 🌪️ Predicción de volatilidad de acciones de EE.UU. con Machine Learning
 
 Proyecto 2 del portafolio de finanzas. Clasificador que anticipa si la **volatilidad de los próximos 5 días hábiles** de una acción será **alta**, con validación temporal estricta, comparación contra un baseline y explicabilidad con SHAP.
 

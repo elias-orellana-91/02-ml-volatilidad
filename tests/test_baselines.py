@@ -1,4 +1,4 @@
-﻿"""Tests de los baselines (sin red)."""
+"""Tests de los baselines (sin red)."""
 import numpy as np
 import pandas as pd
 import pytest

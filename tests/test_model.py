@@ -1,4 +1,4 @@
-﻿"""Tests del artefacto del modelo (sin red)."""
+"""Tests del artefacto del modelo (sin red)."""
 import json
 from pathlib import Path
 

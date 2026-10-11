@@ -1,4 +1,4 @@
-﻿"""Tests de features y target con datos sintéticos (sin red)."""
+"""Tests de features y target con datos sintéticos (sin red)."""
 import numpy as np
 import pandas as pd
 import pytest

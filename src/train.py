@@ -1,4 +1,4 @@
-﻿"""Entrenamiento y evaluación. Uso: ``python -m src.train [--n-iter 8] [--no-shap]``.
+"""Entrenamiento y evaluación. Uso: ``python -m src.train [--n-iter 8] [--no-shap]``.
 
 Protocolo (split temporal, sin mezclar fechas):
   * train: 2015-2021 | validación: 2022 | test: 2023-2025 (se evalúa una sola vez, al final).
