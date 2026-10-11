@@ -2,12 +2,12 @@
 import json
 from pathlib import Path
 
-import joblib
 import numpy as np
 import pandas as pd
 import pytest
 
 from src import features as F
+from tests.conftest import load_verified_model
 
 MODELS = Path(__file__).resolve().parents[1] / "models"
 
@@ -19,7 +19,7 @@ def metadata():
 
 @pytest.fixture(scope="module")
 def model():
-    return joblib.load(MODELS / "model.joblib")
+    return load_verified_model(MODELS)
 
 
 def test_metadata_fields(metadata):

@@ -101,7 +101,8 @@ python -m venv .venv
 pip install -r requirements-dev.txt
 
 python -m src.train               # entrena, evalúa, genera reports/ y models/ (--no-shap, --n-iter N)
-pytest                            # tests (sin red)
+pytest                            # tests (sin red); verifican el SHA-256 del modelo antes de joblib.load
+python -m src.manifest --write    # tras reentrenar: regenera models/manifest.json
 jupyter nbconvert --to notebook --execute --inplace notebooks/modelado.ipynb
 ```
 
@@ -110,6 +111,8 @@ jupyter nbconvert --to notebook --execute --inplace notebooks/modelado.ipynb
 ## 🔌 Uso en el proyecto 3 (API)
 
 `models/model.joblib` + `models/metadata.json` (features en orden, umbral de decisión, fecha de entrenamiento, versión, métricas de test y de los baselines) son el contrato con la API. El bloque **`required_inputs`** de `metadata.json` declara lo que la API debe recibir: las series necesarias (precios con `SPY`, VIX y volumen), el **historial mínimo en días hábiles** (`min_history_days`, calculado empíricamente; hoy 257) y la lista de **tickers soportados con su sector**.
+
+**Integridad.** `joblib` usa pickle (puede ejecutar código al cargarse). `models/manifest.json` guarda el SHA-256 de `model.joblib` y `metadata.json`; los tests lo comprueban antes de cada `joblib.load` (`tests/conftest.py::load_verified_model`) y fallan con un mensaje claro si no coincide. Tras reentrenar hay que regenerarlo con `python -m src.manifest --write` y copiar manifiesto, modelo y metadata juntos al proyecto 3.
 
 Para inferir: `build_features(prices_hasta_t, vix, volume)`, tomar la fila de *t* y `model.predict_proba(fila[metadata["features"]])`. Un ticker fuera de la lista soportada lanza un `ValueError` claro, porque el modelo solo conoce el sector de los 16 tickers de entrenamiento.
 

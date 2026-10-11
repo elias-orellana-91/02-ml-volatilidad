@@ -2,7 +2,6 @@
 import json
 from pathlib import Path
 
-import joblib
 import numpy as np
 import pandas as pd
 import pytest
@@ -10,6 +9,7 @@ from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_s
 
 from src import data as D
 from src import features as F
+from tests.conftest import load_verified_model
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -75,7 +75,7 @@ def test_no_target_in_last_5_days(real):
 def test_saved_model_metrics_independent(real):
     prices, vix, volume = real
     meta = json.loads((ROOT / "models/metadata.json").read_text(encoding="utf-8"))
-    model = joblib.load(ROOT / "models/model.joblib")
+    model = load_verified_model()
     X = F.build_features(prices, vix, volume)[meta["features"]]
     # target recalculado a mano (sin build_target)
     r = prices.pct_change(fill_method=None)
@@ -97,7 +97,7 @@ def test_saved_model_metrics_independent(real):
 def test_inference_on_latest_date(real):
     prices, vix, volume = real
     meta = json.loads((ROOT / "models/metadata.json").read_text(encoding="utf-8"))
-    model = joblib.load(ROOT / "models/model.joblib")
+    model = load_verified_model()
     X = F.build_features(prices, vix, volume)
     last = X.xs(prices.index[-1], level="Date")[meta["features"]]
     assert not last.isna().any().any()

@@ -2,7 +2,6 @@
 import json
 from pathlib import Path
 
-import joblib
 import numpy as np
 import pandas as pd
 import pytest
@@ -10,6 +9,7 @@ import pytest
 from src import data as D
 from src import features as F
 from src.baselines import HARRV, HAR_COLUMNS
+from tests.conftest import load_verified_model
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -91,7 +91,7 @@ def test_metadata_self_sufficient_and_consistent():
 def test_inference_with_exactly_min_history(real):
     prices, vix, volume = real
     meta = json.loads((ROOT / "models/metadata.json").read_text(encoding="utf-8"))
-    model = joblib.load(ROOT / "models/model.joblib")
+    model = load_verified_model()
     n = meta["required_inputs"]["min_history_days"]
     p = prices.iloc[-n:]
     X = F.build_features(p, vix.reindex(p.index), volume.reindex(p.index))
