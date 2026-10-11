@@ -53,7 +53,7 @@ TRAIN_END = pd.Timestamp("2021-12-31")
 VAL_END = pd.Timestamp("2022-12-31")
 BASELINE = "Persistencia"
 # Umbral de decisión fijo: el target es ~50 % positivo por construcción. Optimizarlo sobre 2022
-# (año con 64 % de positivos) sesgaría el umbral hacia abajo y degradaría el test.
+# (año con 65 % de positivos) sesgaría el umbral hacia abajo y degradaría el test.
 DECISION_THRESHOLD = 0.5
 
 
@@ -282,4 +282,5 @@ if __name__ == "__main__":
     ap.add_argument("--no-shap", action="store_true", help="omitir figuras SHAP")
     args = ap.parse_args()
     main(args.n_iter, not args.no_shap)
+
 
