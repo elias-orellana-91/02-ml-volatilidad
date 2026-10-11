@@ -1,7 +1,7 @@
 {
   "model_name": "Regresión logística",
   "model_version": "0.1.0",
-  "trained_at": "2026-10-11T02:23:01+00:00",
+  "trained_at": "2026-10-11T02:47:55+00:00",
   "features": [
     "vol_5",
     "vol_21",
@@ -30,7 +30,39 @@
   ],
   "decision_threshold": 0.5,
   "target": "vol_fwd_5d > mediana móvil 252d (trailing) de la vol 5d del ticker",
-  "trained_on": "2016-01 a 2022-12 (train+validación)",
+  "trained_on": "2016-01-08 a 2022-12-22 (train+validación, 27968 filas)",
+  "trained_on_range": {
+    "start": "2016-01-08",
+    "end": "2022-12-22"
+  },
+  "required_inputs": {
+    "series": {
+      "prices": "Precios de cierre ajustados diarios (DataFrame Date x Ticker). Debe incluir el ticker objetivo y SPY.",
+      "vix": "Cierre diario del ^VIX (Series indexada por fecha).",
+      "volume": "Volumen diario (DataFrame Date x Ticker) del ticker objetivo y SPY."
+    },
+    "market_ticker": "SPY",
+    "min_history_days": 257,
+    "tickers": {
+      "AAPL": "Tecnología",
+      "AMZN": "Tecnología",
+      "BAC": "Bancos",
+      "CVX": "Energía",
+      "GOOGL": "Tecnología",
+      "GS": "Bancos",
+      "JNJ": "Salud",
+      "JPM": "Bancos",
+      "KO": "Consumo",
+      "MSFT": "Tecnología",
+      "NVDA": "Tecnología",
+      "PFE": "Salud",
+      "SPY": "Índice",
+      "UNH": "Salud",
+      "WMT": "Consumo",
+      "XOM": "Energía"
+    },
+    "feature_builder": "src.features.build_features"
+  },
   "hyperparameters": {
     "clf__C": 10.0
   },
@@ -75,6 +107,71 @@
         2783
       ]
     ]
+  },
+  "baselines_test_metrics": {
+    "Persistencia": {
+      "roc_auc": 0.588195589054822,
+      "pr_auc": 0.5458315133615728,
+      "f1": 0.5165181885671863,
+      "precision": 0.5146079881656804,
+      "recall": 0.5184426229508197,
+      "brier": null,
+      "threshold": 1.0,
+      "base_rate": 0.4497319034852547,
+      "n": 11936,
+      "confusion_matrix": [
+        [
+          3943,
+          2625
+        ],
+        [
+          2585,
+          2783
+        ]
+      ]
+    },
+    "Logística 1 feature": {
+      "roc_auc": 0.588195589054822,
+      "pr_auc": 0.5458315133615728,
+      "f1": 0.46351022137485437,
+      "precision": 0.537196169899337,
+      "recall": 0.4076005961251863,
+      "brier": 0.24309987542920194,
+      "threshold": 0.5,
+      "base_rate": 0.4497319034852547,
+      "n": 11936,
+      "confusion_matrix": [
+        [
+          4683,
+          1885
+        ],
+        [
+          3180,
+          2188
+        ]
+      ]
+    },
+    "HAR-RV": {
+      "roc_auc": 0.6270867047655525,
+      "pr_auc": 0.577042750914776,
+      "f1": 0.5917519181585678,
+      "precision": 0.5181970884658454,
+      "recall": 0.6896423248882265,
+      "brier": null,
+      "threshold": 1.0,
+      "base_rate": 0.4497319034852547,
+      "n": 11936,
+      "confusion_matrix": [
+        [
+          3126,
+          3442
+        ],
+        [
+          1666,
+          3702
+        ]
+      ]
+    }
   },
   "library_versions": {
     "scikit-learn": "1.9.1",
