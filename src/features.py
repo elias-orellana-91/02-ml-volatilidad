@@ -64,8 +64,19 @@ def build_features(
     volume : volumen diario (Date x Ticker, opcional; añade ``volume_ratio_5_63``).
 
     Las primeras ~252 filas de cada ticker tienen NaN (calentamiento de la mediana de 252d);
-    ``dropna()`` las elimina. Tickers sin sector conocido reciben ceros en el one-hot.
+    ``dropna()`` las elimina.
+
+    Raises
+    ------
+    ValueError : si ``prices`` contiene un ticker que no está en ``TICKER_TO_SECTOR``
+        (el modelo solo conoce los sectores de los tickers de entrenamiento), o si falta SPY.
     """
+    unknown = [c for c in prices.columns if c not in TICKER_TO_SECTOR]
+    if unknown:
+        raise ValueError(
+            f"Tickers sin sector conocido: {unknown}. Soportados: {sorted(TICKER_TO_SECTOR)}. "
+            "Añade el ticker a SECTORS en src/data.py (y reentrena) para usarlo."
+        )
     if market not in prices.columns:
         raise ValueError(f"prices debe incluir la columna de mercado {market!r}")
     prices = prices.sort_index()
@@ -133,6 +144,37 @@ def build_target(prices: pd.DataFrame) -> pd.DataFrame:
     valid = out["vol_fwd_5d"].notna() & out["threshold"].notna()
     out["target"] = np.where(valid, (out["vol_fwd_5d"] > out["threshold"]).astype(float), np.nan)
     return out
+
+
+def build_har_inputs(prices: pd.DataFrame) -> pd.DataFrame:
+    """Entradas del baseline HAR-RV (Corsi 2009), formato largo ``(Date, Ticker)``.
+
+    ``har_d``: vol diaria (|retorno| anualizado), ``har_w``: vol realizada 5d y
+    ``har_m``: vol realizada 22d. Solo usan información <= t.
+    """
+    rets = prices.sort_index().pct_change(fill_method=None)
+    wide = {"har_d": rets.abs() * ANN, "har_w": _roll_vol(rets, 5), "har_m": _roll_vol(rets, 22)}
+    out = pd.concat(wide, axis=1).stack(level=1, future_stack=True)
+    out.index.names = ["Date", "Ticker"]
+    return out.sort_index()
+
+
+def min_history_days(seed: int = 0) -> int:
+    """Mínimo de filas (días hábiles) de historial para que ``build_features`` no dé NaN en la última fila.
+
+    Se calcula empíricamente con datos sintéticos (no es una constante a mano), así que
+    se mantiene correcto si cambian las ventanas.
+    """
+    rng = np.random.default_rng(seed)
+    for n in range(2, 1000):
+        idx = pd.bdate_range("2000-01-03", periods=n)
+        px = pd.DataFrame(100 * np.cumprod(1 + rng.normal(0, 0.01, (n, 2)), axis=0), index=idx, columns=["SPY", "AAPL"])
+        vix = pd.Series(20.0 + rng.random(n), index=idx)
+        vol = pd.DataFrame(1e6 * (1 + rng.random((n, 2))), index=idx, columns=px.columns)
+        last = build_features(px, vix, vol).xs(idx[-1], level="Date")
+        if not last.isna().any().any():
+            return n
+    raise RuntimeError("No se pudo determinar el historial mínimo")
 
 
 def make_dataset(
